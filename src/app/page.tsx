@@ -5,28 +5,27 @@ import { supabase } from "../lib/supabase";
 
 export default function Home() {
   const [uploading, setUploading] = useState(false);
-  const [url, setUrl] = useState<string | null>(null);
-  const [pets, setPets] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
 
-  // 🔹 Buscar imagens do banco
-  async function fetchPets() {
+  // 🔹 Buscar sessões
+  async function fetchSessions() {
     const { data, error } = await supabase
-      .from("pets")
+      .from("preview_sessions")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Erro ao buscar pets:", error);
+      console.error("Erro ao buscar sessões:", error);
       return;
     }
 
     if (data) {
-      setPets(data);
+      setSessions(data);
     }
   }
 
   useEffect(() => {
-    fetchPets();
+    fetchSessions();
   }, []);
 
   // 🔹 Upload
@@ -57,21 +56,22 @@ export default function Home() {
 
     const publicUrl = publicData.publicUrl;
 
-    // 3️⃣ Salvar no banco
-    const { error: dbError } = await supabase.from("pets").insert({
-      image_url: publicUrl,
-      status: "uploaded",
-    });
+    // 3️⃣ Criar sessão
+    const { error: dbError } = await supabase
+      .from("preview_sessions")
+      .insert({
+        pet_photo_url: publicUrl,
+        status: "uploaded",
+      });
 
     if (dbError) {
       console.error("DB error:", dbError);
     }
 
-    setUrl(publicUrl);
     setUploading(false);
 
-    // 4️⃣ Atualizar galeria
-    fetchPets();
+    // 4️⃣ Atualizar lista
+    fetchSessions();
   }
 
   return (
@@ -82,20 +82,27 @@ export default function Home() {
 
       {uploading && <p>Enviando...</p>}
 
-      {url && (
-        <div>
-          <p>Upload concluído:</p>
-          <img src={url} width={300} />
-        </div>
-      )}
-
       <hr style={{ margin: "40px 0" }} />
 
-      <h2>Galeria</h2>
+      <h2>Sessões</h2>
 
-      {pets.map((pet) => (
-        <div key={pet.id} style={{ marginBottom: 20 }}>
-          <img src={pet.image_url} width={200} />
+      {sessions.map((session) => (
+        <div
+          key={session.id}
+          style={{
+            marginBottom: 30,
+            padding: 20,
+            border: "1px solid #333",
+            borderRadius: 8,
+          }}
+        >
+          <img
+            src={session.pet_photo_url}
+            width={200}
+            style={{ display: "block", marginBottom: 10 }}
+          />
+
+          <strong>Status:</strong> {session.status}
         </div>
       ))}
     </main>
