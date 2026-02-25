@@ -105,10 +105,21 @@ export default function Home() {
           </p>
 
           {session.status === "uploaded" && (
-            <button onClick={() => generatePreview(session.id)}>
-              Gerar Preview
-            </button>
-          )}
+  <button
+    onClick={() => generatePreview(session.id)}
+    style={{
+      padding: "8px 16px",
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      borderRadius: 6,
+      cursor: "pointer",
+      marginTop: 10,
+    }}
+  >
+    Gerar Preview
+  </button>
+)}
 
           {session.status === "processing" && <p>Gerando preview...</p>}
 
